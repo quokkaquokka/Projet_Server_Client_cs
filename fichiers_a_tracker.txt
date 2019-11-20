@@ -1,0 +1,4 @@
+.sln
+.csproj
+App.config
+Fichiers de code
