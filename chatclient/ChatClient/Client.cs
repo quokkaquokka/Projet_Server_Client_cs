@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -13,9 +14,13 @@ namespace ChatClient {
 
 			Console.WriteLine("Connecting...");
 			sock = new TcpClient("localhost", 8080);
+			Console.WriteLine("Connected!!!");
 			// now talk with the server if connected
 
-			Console.WriteLine("Connected!!!");
+			StreamReader sIn = new StreamReader(sock.GetStream());
+			string msg = sIn.ReadLine();
+			Console.WriteLine(msg);
+
 			Console.ReadLine();
 		}
 	}
