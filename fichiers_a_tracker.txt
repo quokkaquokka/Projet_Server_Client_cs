@@ -1,4 +1,5 @@
 .sln
 .csproj
 App.config
+Properties/AssemblyInfo.cs
 Fichiers de code
