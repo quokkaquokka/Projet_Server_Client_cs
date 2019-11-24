@@ -17,6 +17,7 @@ namespace ChatClient {
 			Console.WriteLine("Connected!!!");
 			// now talk with the server if connected
 
+			// wait for a message
 			StreamReader sIn = new StreamReader(sock.GetStream());
 			string msg = sIn.ReadLine();
 			Console.WriteLine(msg);
