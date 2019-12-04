@@ -4,25 +4,45 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ChatClient {
 	class Client {
 		private TcpClient sock;
+		private StreamWriter sOut;
+		private string msg;
+
 		public Client() {
 			byte[] local_IP = { 127, 0, 0, 1 };
 
+			// try to connect to the server
 			Console.WriteLine("Connecting...");
-			sock = new TcpClient("localhost", 8080);
+			bool connectionOk = false;
+			while(!connectionOk) {
+				try {
+					sock = new TcpClient("localhost", 8080);
+					connectionOk = true;
+				}
+				catch(Exception e) { connectionOk = false; }
+			}
 			Console.WriteLine("Connected!!!");
-			// now talk with the server if connected
 
-			// wait for a message
-			StreamReader sIn = new StreamReader(sock.GetStream());
-			string msg = sIn.ReadLine();
-			Console.WriteLine(msg);
+			// create and start the receiver to run alongside the application
+			Receiver receiver = new Receiver(sock);
+			Thread threadReceiver = new Thread(new ThreadStart(receiver.run));
+			threadReceiver.Start();
 
-			Console.ReadLine();
+			// send messages to the server
+			sOut = new StreamWriter(sock.GetStream());
+			sOut.AutoFlush = true;
+
+			msg = "";
+
+			while(msg != "/q") {
+				msg = Console.ReadLine();
+				sOut.WriteLine(msg);
+			}
 		}
 	}
 }

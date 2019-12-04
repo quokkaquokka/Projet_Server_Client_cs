@@ -31,10 +31,11 @@ namespace ChatServer {
 
 				Console.WriteLine("Connection detected!!!");
 
-				// start a new client manager
+				// create a new client manager for this client
 				connectedClients.Add(new ClientManager(cli_sock));
-				Thread threadClientManager = new Thread(new ThreadStart(connectedClients[nbConnectedClients++].run));
 
+				// start the new client manager
+				Thread threadClientManager = new Thread(new ThreadStart(connectedClients[nbConnectedClients++].run));
 				threadClientManager.Start();
 			}
 

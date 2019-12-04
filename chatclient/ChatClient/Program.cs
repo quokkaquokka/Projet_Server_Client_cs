@@ -8,6 +8,7 @@ namespace ChatClient {
 	class Program {
 		static void Main(string[] args) {
 			new Client();
+			Console.WriteLine("Bye!");
 		}
 	}
 }
