@@ -64,6 +64,7 @@ namespace ChatServer {
 			}*/
 		}
 
+		// ask the user for credentials and check if they are valid
 		public bool Login() {
 			clearClientScreen();
 			sOut.WriteLine("Log In\n----------");
@@ -90,6 +91,7 @@ namespace ChatServer {
 			return false;
 		}
 
+		// ask the user for credentials and add a new user in the list of the server
 		public bool Register() {
 			clearClientScreen();
 			sOut.WriteLine("Register\n----------");
@@ -105,6 +107,7 @@ namespace ChatServer {
 				if(password != "/q") {
 					// add the user in the list of the server
 					server.Users.Add(new User(username, password));
+					server.Backup();
 
 					return true;
 				}

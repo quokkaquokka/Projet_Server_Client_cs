@@ -7,6 +7,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ChatServer {
 	class Server {
@@ -19,6 +21,7 @@ namespace ChatServer {
 
 		public Server() {
 			users = new List<User>();
+			Restore();
 			connectedClients = new List<ClientManager>();
 			nbConnectedClients = 0;
 
@@ -43,6 +46,23 @@ namespace ChatServer {
 			}
 
 			Console.ReadLine();
+		}
+
+		// serialize the data of the users and the topics in a file
+		public void Backup() {
+			IFormatter formatter = new BinaryFormatter();
+			Stream stream = new FileStream("data/users.txt", FileMode.Create, FileAccess.Write);
+
+			formatter.Serialize(stream, users);
+			stream.Close();
+		}
+
+		// deserialize the data of the users and the topics from a file
+		public void Restore() {
+			IFormatter formatter = new BinaryFormatter();
+			Stream stream = new FileStream("data/users.txt", FileMode.Open, FileAccess.Read);
+
+			users = (List<User>) formatter.Deserialize(stream);
 		}
 
 		public List<ClientManager> ConnectedClients {

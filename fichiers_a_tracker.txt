@@ -2,4 +2,5 @@
 .csproj
 App.config
 Properties/AssemblyInfo.cs
+ChatServer/ChatServer/bin/Debug/data
 Fichiers de code
