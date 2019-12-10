@@ -7,12 +7,14 @@ using System.Text;
 
 namespace ChatServer {
 	class ClientManager {
+		private Server server;
 		private TcpClient clientSocket;
 		private StreamWriter sOut;
 		private StreamReader sIn;
 		private string msg;
 
-		public ClientManager(TcpClient clientSocket) {
+		public ClientManager(TcpClient clientSocket, Server server) {
+			this.server = server;
 			this.clientSocket = clientSocket;
 			sOut = new StreamWriter(clientSocket.GetStream());
 			sOut.AutoFlush = true;
@@ -24,14 +26,110 @@ namespace ChatServer {
 
 		public void run() {
 			// send a message to the new client
-			sOut.WriteLine("Welcome {name of the subject}, from {city of the subject}");
-
-			msg = sIn.ReadLine();
-			while(msg != "/q") {
-				Console.WriteLine(msg);
-				// apply the action depending on the message
+			bool next = false;
+			while(!next) {
+				clearClientScreen();
+				sOut.WriteLine("What do you want to do?\n" +
+					       "1: Log In\n"     +
+					       "2: Register\n\n" +
+					       "0: Quit\n\n"     +
+					       "Your choice: "   );
 				msg = sIn.ReadLine();
+
+				switch(msg) {
+					case "0":
+						clearClientScreen();
+						sOut.WriteLine("Server: Bye!");
+						next = true;
+						break;
+					case "1":
+						next = Login();
+						break;
+					case "2":
+						next = Register();
+						break;
+					default:
+						break;
+				}
 			}
+
+			sOut.WriteLine("done");
+
+			//sOut.WriteLine("Welcome {name of the subject}, from {city of the subject}");
+
+			/*while(msg != "/q") {
+				// apply the action depending on the message
+				Console.WriteLine(msg);
+				msg = sIn.ReadLine();
+			}*/
+		}
+
+		public bool Login() {
+			clearClientScreen();
+			sOut.WriteLine("Log In\n----------");
+
+			string password, username;
+
+			sOut.WriteLine("Type your username (or /q to go back):");
+			username = sIn.ReadLine();
+
+			if(username != "/q") {
+				sOut.WriteLine("Type your password:");
+				password = sIn.ReadLine();
+				if(password != "/q") {
+					// check credentials
+					foreach(User user in server.Users) {
+						if(user.Username == username && user.Password == password) {
+							sOut.WriteLine("Server: You are now connected as " + username);
+							return true;
+						}
+					}
+				}
+			}
+
+			return false;
+		}
+
+		public bool Register() {
+			clearClientScreen();
+			sOut.WriteLine("Register\n----------");
+
+			string password, username;
+
+			sOut.WriteLine("Type your username (or /q to go back):");
+			username = sIn.ReadLine();
+
+			if(username != "/q") {
+				sOut.WriteLine("Type your password:");
+				password = sIn.ReadLine();
+				if(password != "/q") {
+					// add the user in the list of the server
+					server.Users.Add(new User(username, password));
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		// check if the message is a number between 0 and the max value
+		public bool MessageOk(string msg, int max) {
+			string cntString;
+
+			for(int i = 0; i <= max; i++) {
+				cntString = "" + i;
+				if(msg == cntString) return true;
+			}
+
+			return false;
+		}
+
+		// clear the screen of the client
+		public void clearClientScreen() {
+			sOut.WriteLine("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" +
+				           "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" +
+				           "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" );
 		}
 	}
 }

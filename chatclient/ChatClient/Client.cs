@@ -39,7 +39,8 @@ namespace ChatClient {
 
 			msg = "";
 
-			while(msg != "/q") {
+			//while(msg != "/q") {
+			while(true) {
 				msg = Console.ReadLine();
 				sOut.WriteLine(msg);
 			}

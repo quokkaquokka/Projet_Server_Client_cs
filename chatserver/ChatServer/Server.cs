@@ -15,7 +15,10 @@ namespace ChatServer {
 		private List<ClientManager> connectedClients;
 		private int nbConnectedClients;
 
+		private List<User> users;
+
 		public Server() {
+			users = new List<User>();
 			connectedClients = new List<ClientManager>();
 			nbConnectedClients = 0;
 
@@ -32,7 +35,7 @@ namespace ChatServer {
 				Console.WriteLine("Connection detected!!!");
 
 				// create a new client manager for this client
-				connectedClients.Add(new ClientManager(cli_sock));
+				connectedClients.Add(new ClientManager(cli_sock, this));
 
 				// start the new client manager
 				Thread threadClientManager = new Thread(new ThreadStart(connectedClients[nbConnectedClients++].run));
@@ -40,6 +43,14 @@ namespace ChatServer {
 			}
 
 			Console.ReadLine();
+		}
+
+		public List<ClientManager> ConnectedClients {
+			get { return connectedClients; }
+		}
+
+		public List<User> Users {
+			get { return users; }
 		}
 	}
 }
