@@ -1,0 +1,8 @@
+ChatClient/.vs/
+ChatClient/ChatClient/obj
+ChatClient/ChatClient/bin
+ChatServer/.vs/
+ChatServer/ChatServer/obj
+ChatServer/ChatServer/bin/Debug/ChatServer.exe
+ChatServer/ChatServer/bin/Debug/ChatServer.exe.config
+ChatServer/ChatServer/bin/Debug/ChatServer.pdb
