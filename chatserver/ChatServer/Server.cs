@@ -18,9 +18,11 @@ namespace ChatServer {
 		private int nbConnectedClients;
 
 		private List<User> users;
+		private List<string> topics;
 
 		public Server() {
 			users = new List<User>();
+			topics = new List<string>();
 			Restore();
 			connectedClients = new List<ClientManager>();
 			nbConnectedClients = 0;
@@ -63,6 +65,7 @@ namespace ChatServer {
 			Stream stream = new FileStream("data/users.txt", FileMode.Open, FileAccess.Read);
 
 			users = (List<User>) formatter.Deserialize(stream);
+			stream.Close();
 		}
 
 		public List<ClientManager> ConnectedClients {
@@ -71,6 +74,10 @@ namespace ChatServer {
 
 		public List<User> Users {
 			get { return users; }
+		}
+
+		public List<string> Topics {
+			get { return topics; }
 		}
 	}
 }

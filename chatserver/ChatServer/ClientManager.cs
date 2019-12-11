@@ -6,13 +6,13 @@ using System.Net.Sockets;
 using System.Text;
 
 namespace ChatServer {
-	// class launched in a thread for each client who log in
+	// Class launched in a thread for each client who log in
 	class ClientManager {
 		private Server server;
 		private TcpClient clientSocket;
 		private StreamWriter sOut;
 		private StreamReader sIn;
-		private string msg;
+		private string msg, username;
 
 		public ClientManager(TcpClient clientSocket, Server server) {
 			this.server = server;
@@ -24,6 +24,7 @@ namespace ChatServer {
 			sIn = new StreamReader(clientSocket.GetStream());
 
 			msg = "";
+			username = "";
 		}
 
 		public void run() {
@@ -33,10 +34,10 @@ namespace ChatServer {
 			while(!next) {
 				clearClientScreen();
 				sOut.WriteLine("What do you want to do?\n" +
-					       "1: Log In\n"     +
-					       "2: Register\n\n" +
-					       "0: Quit\n\n"     +
-					       "Your choice: "   );
+					"1: Log In\n"     +
+					"2: Register\n\n" +
+					"0: Quit\n\n"     +
+					"Your choice: "   );
 				msg = sIn.ReadLine();
 
 				switch(msg) {
@@ -57,22 +58,42 @@ namespace ChatServer {
 				}
 			}
 
+			// Main menu
 			while(!quit) {
-				quit = true;
+				clearClientScreen();
+				sOut.WriteLine("Welcome " + username + "!\n" +
+					"What do you want to do?\n" +
+					"1: Join a topic\n" +
+					"2: Create a new topic\n" +
+					"3: Send private messages\n\n" +
+					"0: Quit\n\n" +
+					"Your choice: ");
+				msg = sIn.ReadLine();
+
+				switch(msg) {
+					case "0":
+						clearClientScreen();
+						sOut.WriteLine("Server: bye");
+						quit = true;
+						break;
+					case "1":
+						JoinTopic();
+						break;
+					case "2":
+						CreateTopic();
+						break;
+					case "3":
+						SendPrivateMessages();
+						break;
+					default:
+						break;
+				}
 			}
 
 			sOut.WriteLine("Server: bye");
-
-			//sOut.WriteLine("Welcome {name of the subject}, from {city of the subject}");
-
-			/*while(msg != "/q") {
-				// apply the action depending on the message
-				Console.WriteLine(msg);
-				msg = sIn.ReadLine();
-			}*/
 		}
 
-		// ask the user for credentials and check if they are valid
+		// Ask the user for credentials and check if they are valid
 		public bool Login() {
 			clearClientScreen();
 			sOut.WriteLine("Log In\n----------");
@@ -89,7 +110,7 @@ namespace ChatServer {
 					// check credentials
 					foreach(User user in server.Users) {
 						if(user.Username == username && user.Password == password) {
-							sOut.WriteLine("Server: username:" + username);
+							this.username = username;
 							return true;
 						}
 					}
@@ -99,7 +120,7 @@ namespace ChatServer {
 			return false;
 		}
 
-		// ask the user for credentials and add a new user in the list of the server
+		// Ask the user for credentials and add a new user in the list of the server
 		public bool Register() {
 			clearClientScreen();
 			sOut.WriteLine("Register\n----------");
@@ -124,7 +145,42 @@ namespace ChatServer {
 			return false;
 		}
 
-		// check if the message is a number between 0 and the max value
+		public void JoinTopic() {
+			clearClientScreen();
+		}
+
+		public void CreateTopic() {
+			clearClientScreen();
+
+			bool next = false;
+			while(!next) {
+				sOut.WriteLine("Type the name of the topic you want to create (or /q to go back):");
+				msg = sIn.ReadLine();
+
+				next = true;
+				if(msg != "/q") {
+					// check if the topic already exists
+					foreach(string topic in server.Topics)
+						if(msg == topic) {
+							next = false;
+							clearClientScreen();
+							sOut.WriteLine("Sorry, this topic already exists.");
+						}
+
+					// if the name doesn't already exits
+					if(next) {
+						server.Topics.Add(msg);
+						//server.Backup();
+					}
+				}
+			}
+		}
+
+		public void SendPrivateMessages() {
+			clearClientScreen();
+		}
+
+		// Check if the message is a number between 0 and the max value
 		public bool MessageOk(string msg, int max) {
 			string cntString;
 
@@ -136,7 +192,7 @@ namespace ChatServer {
 			return false;
 		}
 
-		// clear the screen of the client
+		// Clear the screen of the client
 		public void clearClientScreen() {
 			sOut.WriteLine("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" +
 				           "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" +

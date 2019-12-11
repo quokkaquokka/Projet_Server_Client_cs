@@ -24,17 +24,18 @@ namespace ChatClient {
 				// wait for messages to display
 				msg = sIn.ReadLine();
 				msgSplit = msg.Split(':');
+
+				// if the message begin with "Server: " it is an instruction to execute
 				if(msgSplit[0] == "Server")
 					switch(msgSplit[1]) {
 						case " bye":
 							quit = true;
 							break;
-						case " username":
-							break;
 						default:
 							Console.WriteLine(msg);
 							break;
 					}
+				// otherwise display the message
 				else
 					Console.WriteLine(msg);
 			}
