@@ -103,10 +103,10 @@ namespace ChatServer {
 			sOut.WriteLine("Type your username (or /q to go back):");
 			username = sIn.ReadLine();
 
-			if(username != "/q") {
+			if(username != "/q" && username != "") {
 				sOut.WriteLine("Type your password:");
 				password = sIn.ReadLine();
-				if(password != "/q") {
+				if(password != "/q" && password != "") {
 					// check credentials
 					foreach(User user in server.Users) {
 						if(user.Username == username && user.Password == password) {
@@ -130,10 +130,10 @@ namespace ChatServer {
 			sOut.WriteLine("Type your username (or /q to go back):");
 			username = sIn.ReadLine();
 
-			if(username != "/q") {
+			if(username != "/q" && username != "") {
 				sOut.WriteLine("Type your password:");
 				password = sIn.ReadLine();
-				if(password != "/q") {
+				if(password != "/q" && password != "") {
 					// add the user in the list of the server
 					server.Users.Add(new User(username, password));
 					server.Backup();
@@ -158,19 +158,20 @@ namespace ChatServer {
 				msg = sIn.ReadLine();
 
 				next = true;
-				if(msg != "/q") {
+				if(msg != "/q" && msg != "") {
 					// check if the topic already exists
-					foreach(string topic in server.Topics)
+					foreach(string topic in server.Topics) {
 						if(msg == topic) {
 							next = false;
 							clearClientScreen();
 							sOut.WriteLine("Sorry, this topic already exists.");
 						}
+					}
 
 					// if the name doesn't already exits
 					if(next) {
 						server.Topics.Add(msg);
-						//server.Backup();
+						server.Backup();
 					}
 				}
 			}

@@ -35,7 +35,7 @@ namespace ChatClient {
 							Console.WriteLine(msg);
 							break;
 					}
-				// otherwise display the message
+				// otherwise, display the message
 				else
 					Console.WriteLine(msg);
 			}

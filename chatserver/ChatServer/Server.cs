@@ -54,8 +54,11 @@ namespace ChatServer {
 		public void Backup() {
 			IFormatter formatter = new BinaryFormatter();
 			Stream stream = new FileStream("data/users.txt", FileMode.Create, FileAccess.Write);
-
 			formatter.Serialize(stream, users);
+			stream.Close();
+
+			stream = new FileStream("data/topics.txt", FileMode.Create, FileAccess.Write);
+			formatter.Serialize(stream, topics);
 			stream.Close();
 		}
 
@@ -63,8 +66,11 @@ namespace ChatServer {
 		public void Restore() {
 			IFormatter formatter = new BinaryFormatter();
 			Stream stream = new FileStream("data/users.txt", FileMode.Open, FileAccess.Read);
-
 			users = (List<User>) formatter.Deserialize(stream);
+			stream.Close();
+
+			stream = new FileStream("data/topics.txt", FileMode.Open, FileAccess.Read);
+			topics = (List<string>)formatter.Deserialize(stream);
 			stream.Close();
 		}
 
