@@ -12,7 +12,7 @@ namespace ChatServer {
 		private TcpClient clientSocket;
 		private StreamWriter sOut;
 		private StreamReader sIn;
-		private string msg, username;
+		private string msg, username, topic;
 
 		public ClientManager(TcpClient clientSocket, Server server) {
 			this.server = server;
@@ -25,6 +25,7 @@ namespace ChatServer {
 
 			msg = "";
 			username = "";
+			topic = "";
 		}
 
 		public void run() {
@@ -32,7 +33,7 @@ namespace ChatServer {
 			bool next = false;
 			bool quit = false;
 			while(!next) {
-				clearClientScreen();
+				ClearClientScreen();
 				sOut.WriteLine("What do you want to do?\n" +
 					"1: Log In\n"     +
 					"2: Register\n\n" +
@@ -42,7 +43,7 @@ namespace ChatServer {
 
 				switch(msg) {
 					case "0":
-						clearClientScreen();
+						ClearClientScreen();
 						sOut.WriteLine("Server: bye");
 						next = true;
 						quit = true;
@@ -60,7 +61,7 @@ namespace ChatServer {
 
 			// Main menu
 			while(!quit) {
-				clearClientScreen();
+				ClearClientScreen();
 				sOut.WriteLine("Welcome " + username + "!\n" +
 					"What do you want to do?\n" +
 					"1: Join a topic\n" +
@@ -72,8 +73,7 @@ namespace ChatServer {
 
 				switch(msg) {
 					case "0":
-						clearClientScreen();
-						sOut.WriteLine("Server: bye");
+						ClearClientScreen();
 						quit = true;
 						break;
 					case "1":
@@ -90,12 +90,15 @@ namespace ChatServer {
 				}
 			}
 
+			// send a message to close the client
 			sOut.WriteLine("Server: bye");
+			// remove this client manager from the list of the connected clients
+			server.Logout(this);
 		}
 
 		// Ask the user for credentials and check if they are valid
 		public bool Login() {
-			clearClientScreen();
+			ClearClientScreen();
 			sOut.WriteLine("Log In\n----------");
 
 			string password, username;
@@ -122,7 +125,7 @@ namespace ChatServer {
 
 		// Ask the user for credentials and add a new user in the list of the server
 		public bool Register() {
-			clearClientScreen();
+			ClearClientScreen();
 			sOut.WriteLine("Register\n----------");
 
 			string password, username;
@@ -137,7 +140,7 @@ namespace ChatServer {
 					// add the user in the list of the server
 					server.Users.Add(new User(username, password));
 					server.Backup();
-
+					this.username = username;
 					return true;
 				}
 			}
@@ -145,12 +148,46 @@ namespace ChatServer {
 			return false;
 		}
 
+		// Display the list of the topics and let the user choose which one he wants to join
 		public void JoinTopic() {
-			clearClientScreen();
+			bool next = false;
+			int cnt, msgInt;
+
+			while(!next) {
+				ClearClientScreen();
+
+				// display the list of the topics
+				string strDisplay = "List of the topics\n--------------------\n\n";
+
+				cnt = 1;
+				foreach(string topic in server.Topics) {
+					strDisplay += (cnt++) + ": " + topic + "\n";
+				}
+
+				strDisplay += "\n0: Cancel\n\n" +
+					"Which topic do you want to join?\n" +
+					"Your choice:";
+				sOut.WriteLine(strDisplay);
+
+				// wait for user's choice
+				msg = sIn.ReadLine();
+				if(MessageOk(msg, server.Topics.Count)) {
+					next = true;
+					// join the topic the user asked
+					if(msg != "0") {
+						msgInt = 0;
+						try { msgInt = Int32.Parse(msg); }
+						catch(FormatException e) { Console.WriteLine(e.Message); }
+						topic = server.Topics[--msgInt];
+						SendTopicMessages();
+					}
+				}
+			}
 		}
 
+		// Ask the user for a name and add a new topic in the list of the server
 		public void CreateTopic() {
-			clearClientScreen();
+			ClearClientScreen();
 
 			bool next = false;
 			while(!next) {
@@ -163,7 +200,7 @@ namespace ChatServer {
 					foreach(string topic in server.Topics) {
 						if(msg == topic) {
 							next = false;
-							clearClientScreen();
+							ClearClientScreen();
 							sOut.WriteLine("Sorry, this topic already exists.");
 						}
 					}
@@ -177,8 +214,49 @@ namespace ChatServer {
 			}
 		}
 
+		// Loop while the user wants to send messages in the current
+		public void SendTopicMessages() {
+			// display welcome message to all client
+			// so everybody knows that a new client is in the topic
+			ClearClientScreen();
+			SendTopicMessage("Server: " + username + " has joined the " + topic + " topic", false);
+			sOut.WriteLine("Server: Welcome on the " + topic + " topic " + username + "!\n" +
+				"At any moment, type /q to quit this topic.");
+
+			while(msg != "/q") {
+				// wait for messages
+				msg = sIn.ReadLine();
+
+				if(msg != "/q") {
+					// format the messages and send it
+					msg = username + ": " + msg;
+					SendTopicMessage(msg, false);
+				}
+			}
+
+			// leave the topic
+			SendTopicMessage("Server: " + username + " has left the topic", true);
+			topic = "";
+		}
+
+		// Send a message to all user in the current topic
+		public void SendTopicMessage(string msg, bool includeMe) {
+			foreach(ClientManager client in server.ConnectedClients) {
+				if(client.Topic == topic) {
+					if(client != this)
+						client.DisplayTopicMessage(msg);
+					else if(includeMe)
+						client.DisplayTopicMessage(msg);
+				}
+			}
+		}
+
+		public void DisplayTopicMessage(string msg) {
+			sOut.WriteLine(msg);
+		}
+
 		public void SendPrivateMessages() {
-			clearClientScreen();
+			ClearClientScreen();
 		}
 
 		// Check if the message is a number between 0 and the max value
@@ -194,10 +272,19 @@ namespace ChatServer {
 		}
 
 		// Clear the screen of the client
-		public void clearClientScreen() {
+		public void ClearClientScreen() {
 			sOut.WriteLine("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" +
 				           "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" +
 				           "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" );
+		}
+
+		// getters and setters
+		public string Username {
+			get { return username; }
+		}
+
+		public string Topic {
+			get { return topic; }
 		}
 	}
 }

@@ -74,6 +74,12 @@ namespace ChatServer {
 			stream.Close();
 		}
 
+		public void Logout(ClientManager clientManager) {
+			connectedClients.Remove(clientManager);
+			nbConnectedClients--;
+		}
+
+		// getters and setters
 		public List<ClientManager> ConnectedClients {
 			get { return connectedClients; }
 		}

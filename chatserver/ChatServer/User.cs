@@ -15,6 +15,7 @@ namespace ChatServer {
 			_password = password;
 		}
 
+		// getters and setters
 		public string Username {
 			get { return _username; }
 		}
