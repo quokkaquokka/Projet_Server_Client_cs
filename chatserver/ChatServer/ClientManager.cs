@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 
 namespace ChatServer {
+	// class launched in a thread for each client who log in
 	class ClientManager {
 		private Server server;
 		private TcpClient clientSocket;
@@ -16,17 +17,19 @@ namespace ChatServer {
 		public ClientManager(TcpClient clientSocket, Server server) {
 			this.server = server;
 			this.clientSocket = clientSocket;
+
+			// Initialisation of the StreamWriter and the StreamReader
 			sOut = new StreamWriter(clientSocket.GetStream());
 			sOut.AutoFlush = true;
-
 			sIn = new StreamReader(clientSocket.GetStream());
 
 			msg = "";
 		}
 
 		public void run() {
-			// send a message to the new client
+			// Connection menu
 			bool next = false;
+			bool quit = false;
 			while(!next) {
 				clearClientScreen();
 				sOut.WriteLine("What do you want to do?\n" +
@@ -39,8 +42,9 @@ namespace ChatServer {
 				switch(msg) {
 					case "0":
 						clearClientScreen();
-						sOut.WriteLine("Server: Bye!");
+						sOut.WriteLine("Server: bye");
 						next = true;
+						quit = true;
 						break;
 					case "1":
 						next = Login();
@@ -53,7 +57,11 @@ namespace ChatServer {
 				}
 			}
 
-			sOut.WriteLine("done");
+			while(!quit) {
+				quit = true;
+			}
+
+			sOut.WriteLine("Server: bye");
 
 			//sOut.WriteLine("Welcome {name of the subject}, from {city of the subject}");
 
@@ -81,7 +89,7 @@ namespace ChatServer {
 					// check credentials
 					foreach(User user in server.Users) {
 						if(user.Username == username && user.Password == password) {
-							sOut.WriteLine("Server: You are now connected as " + username);
+							sOut.WriteLine("Server: username:" + username);
 							return true;
 						}
 					}

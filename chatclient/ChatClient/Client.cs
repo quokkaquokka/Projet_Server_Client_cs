@@ -11,7 +11,8 @@ namespace ChatClient {
 	class Client {
 		private TcpClient sock;
 		private StreamWriter sOut;
-		private string msg;
+		private string msg, username;
+		private bool quit;
 
 		public Client() {
 			byte[] local_IP = { 127, 0, 0, 1 };
@@ -29,7 +30,7 @@ namespace ChatClient {
 			Console.WriteLine("Connected!!!");
 
 			// create and start the receiver to run alongside the application
-			Receiver receiver = new Receiver(sock);
+			Receiver receiver = new Receiver(sock, this);
 			Thread threadReceiver = new Thread(new ThreadStart(receiver.run));
 			threadReceiver.Start();
 
@@ -37,13 +38,18 @@ namespace ChatClient {
 			sOut = new StreamWriter(sock.GetStream());
 			sOut.AutoFlush = true;
 
+			// the client just have to type anything
+			// the server will interpret or reject it
 			msg = "";
-
-			//while(msg != "/q") {
-			while(true) {
+			quit = false;
+			while(!quit) {
 				msg = Console.ReadLine();
 				sOut.WriteLine(msg);
 			}
+		}
+
+		public void Quit() {
+			quit = true;
 		}
 	}
 }

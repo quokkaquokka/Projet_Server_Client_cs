@@ -8,19 +8,39 @@ using System.Threading.Tasks;
 
 namespace ChatClient {
 	class Receiver {
+		private Client client;
 		private StreamReader sIn;
 		private string msg;
+		private string[] msgSplit;
 
-		public Receiver(TcpClient serverSocket) {
+		public Receiver(TcpClient serverSocket, Client client) {
 			sIn = new StreamReader(serverSocket.GetStream());
+			this.client = client;
 		}
 
 		public void run() {
-			// wait for messages to display
-			while(true) {
+			bool quit = false;
+			while(!quit) {
+				// wait for messages to display
 				msg = sIn.ReadLine();
-				Console.WriteLine(msg);
+				msgSplit = msg.Split(':');
+				if(msgSplit[0] == "Server")
+					switch(msgSplit[1]) {
+						case " bye":
+							quit = true;
+							break;
+						case " username":
+							break;
+						default:
+							Console.WriteLine(msg);
+							break;
+					}
+				else
+					Console.WriteLine(msg);
 			}
+
+			Console.WriteLine("Press Enter to quit");
+			client.Quit();
 		}
 	}
 }
