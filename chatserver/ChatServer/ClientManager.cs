@@ -248,15 +248,15 @@ namespace ChatServer {
 			foreach(ClientManager client in server.ConnectedClients) {
 				if(client.Topic == topic) {
 					if(client != this)
-						client.DisplayTopicMessage(msg);
+						client.DisplayMessage(msg);
 					else if(includeMe)
-						client.DisplayTopicMessage(msg);
+						client.DisplayMessage(msg);
 				}
 			}
 		}
 
-		// Method called by another client manager from the same topic to display a message
-		public void DisplayTopicMessage(string msg) {
+		// Method called by another client manager to display a message
+		public void DisplayMessage(string msg) {
 			sOut.WriteLine(msg);
 		}
 
@@ -309,6 +309,21 @@ namespace ChatServer {
 
 		public void SendPrivateMessages(ClientManager privateMessages) {
 			ClearClientScreen();
+			sOut.WriteLine("Server: You are chatting with " + username + ".\n" +
+				"At any moment, type /q to quit this private chat");
+
+			msg = sIn.ReadLine();
+			while(msg != "/q") {
+				// format the message and send it
+				msg = username + " (private): " + msg;
+				privateMessages.DisplayMessage(msg);
+
+				// wait for messages
+				msg = sIn.ReadLine();
+			}
+
+			// leave the discussion
+			//privateMessages.DisplayMessage("Server: " + username + " is away");
 		}
 
 		// Check if the message is a number between 0 and the max value
