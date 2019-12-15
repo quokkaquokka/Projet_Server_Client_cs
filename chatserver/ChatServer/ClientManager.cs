@@ -13,6 +13,7 @@ namespace ChatServer {
 		private StreamWriter sOut;
 		private StreamReader sIn;
 		private string msg, username, topic;
+		private bool logged;
 
 		public ClientManager(TcpClient clientSocket, Server server) {
 			this.server = server;
@@ -23,6 +24,7 @@ namespace ChatServer {
 			sOut.AutoFlush = true;
 			sIn = new StreamReader(clientSocket.GetStream());
 
+			logged = false;
 			msg = "";
 			username = "";
 			topic = "";
@@ -83,7 +85,7 @@ namespace ChatServer {
 						CreateTopic();
 						break;
 					case "3":
-						SendPrivateMessages();
+						SeeConnectedUsers();
 						break;
 					default:
 						break;
@@ -114,6 +116,7 @@ namespace ChatServer {
 					foreach(User user in server.Users) {
 						if(user.Username == username && user.Password == password) {
 							this.username = username;
+							logged = true;
 							return true;
 						}
 					}
@@ -141,6 +144,7 @@ namespace ChatServer {
 					server.Users.Add(new User(username, password));
 					server.Backup();
 					this.username = username;
+					logged = true;
 					return true;
 				}
 			}
@@ -214,7 +218,7 @@ namespace ChatServer {
 			}
 		}
 
-		// Loop while the user wants to send messages in the current
+		// Loop while the user wants to send messages in the current topic
 		public void SendTopicMessages() {
 			// display welcome message to all client
 			// so everybody knows that a new client is in the topic
@@ -251,11 +255,59 @@ namespace ChatServer {
 			}
 		}
 
+		// Method called by another client manager from the same topic to display a message
 		public void DisplayTopicMessage(string msg) {
 			sOut.WriteLine(msg);
 		}
 
-		public void SendPrivateMessages() {
+
+		// Display the list of the connected and logged users and let the user choose which one he wants to talk to
+		public void SeeConnectedUsers() {
+			ClientManager privateMessages;
+			bool next = false;
+			int cnt, msgInt;
+
+			while(!next) {
+				ClearClientScreen();
+
+				List<ClientManager> loggedClients = new List<ClientManager>();
+
+				// display the list of the connected and logged users
+				string strDisplay = "List of the connected users\n-----------------------\n\n";
+
+				cnt = 1;
+				foreach(ClientManager client in server.ConnectedClients) {
+					if(client.Logged && client != this) {
+						loggedClients.Add(client);
+						strDisplay += (cnt++) + ": " + client.Username + "\n";
+					}
+				}
+
+				if(loggedClients.Count == 0)
+					strDisplay += "No one else is connected :'(\n";
+
+				strDisplay += "\n0: Cancel\n\n" +
+					"Who do you want to send a message to?\n" +
+					"Your choice:";
+				sOut.WriteLine(strDisplay);
+
+				// wait for user's choice
+				msg = sIn.ReadLine();
+				if(MessageOk(msg, loggedClients.Count)) {
+					next = true;
+					// join the topic the user asked
+					if(msg != "0") {
+						msgInt = 0;
+						try { msgInt = Int32.Parse(msg); }
+						catch(FormatException e) { Console.WriteLine(e.Message); }
+						privateMessages = loggedClients[--msgInt];
+						SendPrivateMessages(privateMessages);
+					}
+				}
+			}
+		}
+
+		public void SendPrivateMessages(ClientManager privateMessages) {
 			ClearClientScreen();
 		}
 
@@ -285,6 +337,10 @@ namespace ChatServer {
 
 		public string Topic {
 			get { return topic; }
+		}
+
+		public bool Logged {
+			get { return logged; }
 		}
 	}
 }

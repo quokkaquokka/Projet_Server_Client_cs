@@ -14,6 +14,7 @@ namespace ChatServer {
 	class Server {
 		private TcpListener ear;
 		private TcpClient cli_sock;
+
 		private List<ClientManager> connectedClients;
 		private int nbConnectedClients;
 
@@ -50,7 +51,7 @@ namespace ChatServer {
 			Console.ReadLine();
 		}
 
-		// serialize the data of the users and the topics in a file
+		// Serialize the data of the users and the topics in a file
 		public void Backup() {
 			IFormatter formatter = new BinaryFormatter();
 			Stream stream = new FileStream("data/users.txt", FileMode.Create, FileAccess.Write);
@@ -62,7 +63,7 @@ namespace ChatServer {
 			stream.Close();
 		}
 
-		// deserialize the data of the users and the topics from a file
+		// Deserialize the data of the users and the topics from a file
 		public void Restore() {
 			IFormatter formatter = new BinaryFormatter();
 			Stream stream = new FileStream("data/users.txt", FileMode.Open, FileAccess.Read);
@@ -79,7 +80,7 @@ namespace ChatServer {
 			nbConnectedClients--;
 		}
 
-		// getters and setters
+		// Getters and Setters
 		public List<ClientManager> ConnectedClients {
 			get { return connectedClients; }
 		}
