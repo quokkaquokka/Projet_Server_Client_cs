@@ -309,7 +309,7 @@ namespace ChatServer {
 
 		public void SendPrivateMessages(ClientManager privateMessages) {
 			ClearClientScreen();
-			sOut.WriteLine("Server: You are chatting with " + username + ".\n" +
+			sOut.WriteLine("Server: You are chatting with " + privateMessages.Username + ".\n" +
 				"At any moment, type /q to quit this private chat");
 
 			msg = sIn.ReadLine();
@@ -327,7 +327,7 @@ namespace ChatServer {
 		}
 
 		// Check if the message is a number between 0 and the max value
-		public bool MessageOk(string msg, int max) {
+		private bool MessageOk(string msg, int max) {
 			string cntString;
 
 			for(int i = 0; i <= max; i++) {
